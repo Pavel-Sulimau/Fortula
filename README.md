@@ -1,73 +1,53 @@
-# React + TypeScript + Vite
+# PickWise
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+PickWise is a privacy-first random picker web app with a fair, secure wheel.
 
-Currently, two official plugins are available:
+## Highlights
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Equal-odds selection with cryptographically secure randomness
+- Client-side only data flow (entries stay on device)
+- Elimination mode with winner history and restore flow
+- Accessible modal system and keyboard-friendly interactions
+- Production-ready checks: lint, tests, and build
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + TypeScript
+- Vite + Vitest + ESLint
+- Framer Motion + canvas-confetti
 
-## Expanding the ESLint configuration
+## Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev            # local development
+npm run lint           # static checks
+npm run test           # test suite
+npm run test:coverage  # coverage report
+npm run build          # production build
+npm run preview        # preview build output
 ```
+
+## Quality Gate
+
+Before merging:
+
+```bash
+npm run lint && npm run test && npm run build
+```
+
+## Security Notes
+
+- Randomness is sourced from Web Crypto via `src/utils/random.ts`.
+- Persistence uses localStorage key `pickwise-state-v1`.
+- CSP is environment-aware (`vite.config.ts` injects connect-src policy for dev vs build).
+
+## Deploy
+
+GitHub Pages deployment is configured in `.github/workflows/deploy.yml`.
