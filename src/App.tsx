@@ -125,6 +125,7 @@ function App() {
   const [winnerState, setWinnerState] = useState<WinnerState | null>(null);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
   const spinSettledRef = useRef(true);
+  const confettiRef = useRef<ReturnType<typeof confetti.create> | null>(null);
 
   const secureRandomAvailable = useMemo(() => isSecureRandomAvailable(), []);
 
@@ -135,6 +136,19 @@ function App() {
       settings: state.settings,
     });
   }, [state.entries, state.history, state.settings]);
+
+  useEffect(() => {
+    // Keep CSP strict by avoiding blob-backed workers for confetti rendering.
+    confettiRef.current = confetti.create(undefined, {
+      resize: true,
+      useWorker: false,
+    });
+
+    return () => {
+      confettiRef.current?.reset();
+      confettiRef.current = null;
+    };
+  }, []);
 
   const spinDisabled =
     isSpinning || !secureRandomAvailable || state.entries.length === 0;
@@ -232,7 +246,7 @@ function App() {
     setLiveAnnouncement(`Winner: ${pendingWinner.name}`);
 
     if (state.settings.confettiEnabled) {
-      confetti({
+      (confettiRef.current ?? confetti)({
         particleCount: reduceMotion ? 85 : 220,
         spread: reduceMotion ? 40 : 88,
         origin: { y: 0.6 },
