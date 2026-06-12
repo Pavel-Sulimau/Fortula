@@ -421,19 +421,17 @@ function App() {
       transition={{ duration: 0.45 }}
     >
       <header className="app-header">
-        <div className="header-topline">
-          <p className="eyebrow">Fair random picker</p>
-          <p className="trust-pill">Private by default</p>
+        <div className="header-identity">
+          <h1>Fortula</h1>
+          <p className="subtitle">Random. Fair. Instant.</p>
         </div>
-        <h1>Fortula</h1>
-        <p className="subtitle">Equal-odds wheel picks in seconds.</p>
-        <p className="privacy-note">
-          Secure randomness runs in your browser with no hidden weighting.
-        </p>
-        <div className="header-tags" aria-label="Trust highlights">
-          <span>Secure RNG</span>
-          <span>Client-side spins</span>
-          <span>No weighting</span>
+        <div className="header-meta">
+          <p className="trust-pill">Private by default</p>
+          <div className="header-tags" aria-label="Trust highlights">
+            <span>Secure RNG</span>
+            <span>Client-side spins</span>
+            <span>No weighting</span>
+          </div>
         </div>
       </header>
 
