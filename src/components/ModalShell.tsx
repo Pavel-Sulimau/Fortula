@@ -27,6 +27,11 @@ export function ModalShell({
   className,
 }: ModalShellProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const onDismissRef = useRef(onDismiss);
+
+  useEffect(() => {
+    onDismissRef.current = onDismiss;
+  }, [onDismiss]);
 
   useEffect(() => {
     const modal = modalRef.current;
@@ -43,7 +48,7 @@ export function ModalShell({
     function onKeyDown(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onDismiss();
+        onDismissRef.current();
         return;
       }
 
@@ -88,7 +93,7 @@ export function ModalShell({
         previousFocus.focus();
       }
     };
-  }, [onDismiss]);
+  }, []);
 
   return (
     <div className="modal-backdrop" role="presentation" onClick={onDismiss}>

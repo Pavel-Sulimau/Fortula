@@ -18,9 +18,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Intentionally quiet for production users.
-    void error;
-    void errorInfo;
+    console.error('Unhandled UI error in PickWise', error, errorInfo);
   }
 
   override render() {

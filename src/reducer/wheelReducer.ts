@@ -3,6 +3,8 @@ import {
   MAX_ENTRIES,
   MAX_ENTRY_NAME_LENGTH,
   MAX_HISTORY_ITEMS,
+  SPIN_DURATION_MAX_MS,
+  SPIN_DURATION_MIN_MS,
   type Entry,
   type SpinHistoryItem,
   type WheelSettings,
@@ -174,12 +176,22 @@ export function wheelReducer(state: WheelState, action: WheelAction): WheelState
     }
 
     case 'update-settings': {
+      const nextSettings: WheelSettings = {
+        ...state.settings,
+        ...action.payload,
+      };
+
+      if (
+        !Number.isFinite(nextSettings.spinDurationMs) ||
+        nextSettings.spinDurationMs < SPIN_DURATION_MIN_MS ||
+        nextSettings.spinDurationMs > SPIN_DURATION_MAX_MS
+      ) {
+        nextSettings.spinDurationMs = defaultWheelSettings.spinDurationMs;
+      }
+
       return {
         ...state,
-        settings: {
-          ...state.settings,
-          ...action.payload,
-        },
+        settings: nextSettings,
       };
     }
 

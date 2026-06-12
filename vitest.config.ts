@@ -9,6 +9,7 @@ export default defineConfig({
       include: [
         'src/utils/random.ts',
         'src/utils/entries.ts',
+        'src/utils/statistics.ts',
         'src/utils/storage.ts',
         'src/reducer/wheelReducer.ts',
       ],

@@ -287,7 +287,7 @@ function App() {
       return;
     }
 
-    const names = trimAndFilterLines(bulkDraft);
+    const names = trimAndFilterLines(bulkDraft, MAX_ENTRIES - state.entries.length);
     if (names.length === 0) {
       return;
     }
@@ -375,9 +375,20 @@ function App() {
       transition={{ duration: 0.45 }}
     >
       <header className="app-header">
-        <p className="eyebrow">PickWise</p>
-        <h1>Privacy-first wheel picker</h1>
-        <p>Equal-odds spins with secure randomness and no hidden weighting.</p>
+        <div className="header-topline">
+          <p className="eyebrow">Fair random picker</p>
+          <p className="trust-pill">Private by default</p>
+        </div>
+        <h1>PickWise</h1>
+        <p className="subtitle">Equal-odds wheel picks in seconds.</p>
+        <p className="privacy-note">
+          Secure randomness runs in your browser with no hidden weighting.
+        </p>
+        <div className="header-tags" aria-label="Trust highlights">
+          <span>Secure RNG</span>
+          <span>Client-side spins</span>
+          <span>No weighting</span>
+        </div>
       </header>
 
       {!secureRandomAvailable ? (

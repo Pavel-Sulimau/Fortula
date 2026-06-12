@@ -4,9 +4,11 @@ import {
   wheelReducer,
 } from '../reducer/wheelReducer';
 import {
+  defaultWheelSettings,
   MAX_ENTRIES,
   MAX_ENTRY_NAME_LENGTH,
   MAX_HISTORY_ITEMS,
+  SPIN_DURATION_MAX_MS,
   type SpinHistoryItem,
 } from '../types';
 
@@ -83,5 +85,16 @@ describe('wheelReducer', () => {
 
     const next = wheelReducer(state, { type: 'restore-from-history' });
     expect(next.entries).toHaveLength(1);
+  });
+
+  it('falls back to default spinDurationMs for out-of-range updates', () => {
+    const state = createInitialWheelState();
+
+    const next = wheelReducer(state, {
+      type: 'update-settings',
+      payload: { spinDurationMs: SPIN_DURATION_MAX_MS + 1 },
+    });
+
+    expect(next.settings.spinDurationMs).toBe(defaultWheelSettings.spinDurationMs);
   });
 });

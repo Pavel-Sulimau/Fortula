@@ -7,34 +7,108 @@
 }
 
 .app-header {
-  padding: 1.4rem 1.6rem 1.6rem;
-  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  padding: 1.2rem 1.45rem 1.3rem;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, #ffffff);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.72), transparent 52%),
-    linear-gradient(138deg, rgba(248, 238, 220, 0.9), rgba(250, 245, 233, 0.96));
-  box-shadow: var(--shadow);
+    radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.82), transparent 46%),
+    radial-gradient(circle at 86% 110%, rgba(255, 255, 255, 0.52), transparent 44%),
+    linear-gradient(132deg, rgba(248, 240, 224, 0.95), rgba(252, 248, 238, 0.98));
+  box-shadow: 0 16px 40px rgba(43, 30, 14, 0.14);
+}
+
+.app-header::before {
+  content: '';
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -90px;
+  top: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 122, 106, 0.2), transparent 68%);
+  pointer-events: none;
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border-top: 1px solid rgba(255, 255, 255, 0.76);
+  pointer-events: none;
+}
+
+.header-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.45rem;
 }
 
 .app-header h1 {
-  margin: 0.3rem 0;
-  font-size: clamp(2rem, 3.6vw, 3.2rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  position: relative;
+  margin: 0;
+  font-size: clamp(2rem, 4.6vw, 3.6rem);
+  line-height: 0.93;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
 }
 
-.app-header p {
-  margin: 0;
+.subtitle {
+  margin: 0.56rem 0 0;
+  font-size: clamp(1rem, 1.8vw, 1.24rem);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ink-soft) 90%, #463d2f);
+}
+
+.privacy-note {
+  margin: 0.42rem 0 0;
+  max-width: 64ch;
+  font-size: 0.95rem;
+  line-height: 1.45;
   color: var(--ink-soft);
 }
 
 .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
-  font-size: 0.79rem;
+  letter-spacing: 0.15em;
+  font-size: 0.72rem;
   font-weight: 700;
+  color: color-mix(in srgb, var(--primary-strong) 80%, #2e2a22);
+}
+
+.trust-pill {
+  margin: 0;
+  padding: 0.26rem 0.58rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, #ffffff);
+  background: color-mix(in srgb, #ffffff 76%, var(--secondary));
   color: var(--primary-strong);
+  font-size: 0.76rem;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+.header-tags {
+  margin-top: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.header-tags span {
+  padding: 0.28rem 0.56rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--secondary) 66%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--line) 72%, #ffffff);
+  color: color-mix(in srgb, var(--ink-soft) 90%, #2d2a22);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .warning {
@@ -393,6 +467,20 @@ button:focus-visible {
 @media (max-width: 780px) {
   .app-shell {
     width: min(100% - 1rem, 780px);
+  }
+
+  .app-header {
+    padding: 1rem;
+  }
+
+  .header-topline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .header-tags span {
+    font-size: 0.75rem;
   }
 
   .workspace-grid {
