@@ -59,6 +59,11 @@ export function loadPersistedState(): PersistedWheelState | undefined {
               );
             },
           )
+          .map((item) => ({
+            ...item,
+            winnerNameSnapshot: item.winnerNameSnapshot.trim().slice(0, MAX_ENTRY_NAME_LENGTH),
+          }))
+          .filter((item) => item.winnerNameSnapshot.length > 0)
           .slice(0, MAX_HISTORY_ITEMS)
       : [];
 

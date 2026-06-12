@@ -33,7 +33,9 @@ export function HistoryPanel({ history, onClearHistory }: HistoryPanelProps) {
                 Round {history.length - index}: <strong>{item.winnerNameSnapshot}</strong>
               </p>
               <p className="meta">{formatTimestamp(item.timestamp)}</p>
-              <p className="meta">Removed: {item.removedAfterWin ? 'Yes' : 'No'}</p>
+              {item.removedAfterWin ? (
+                <p className="meta">Removed from wheel</p>
+              ) : null}
             </li>
           ))}
         </ol>

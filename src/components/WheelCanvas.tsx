@@ -172,7 +172,7 @@ export function WheelCanvas({
     <div className="wheel-frame" ref={frameRef}>
       <div className="wheel-pointer" aria-hidden="true" />
       <div
-        className={`wheel-spin-layer ${!isSpinning && !reducedMotion ? 'wheel-idle' : ''}`}
+        className={`wheel-spin-layer ${!isSpinning && !reducedMotion && entries.length > 0 ? 'wheel-idle' : ''}`}
         style={{
           transform: `rotate(${rotationDeg}deg)`,
           transition: isSpinning

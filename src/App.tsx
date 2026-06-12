@@ -498,7 +498,7 @@ function App() {
               onChange={(event) => setBulkDraft(event.target.value)}
               disabled={isSpinning || entryLimitReached}
               rows={5}
-              placeholder={'Paste names, one per line'}
+              placeholder="Paste names, one per line"
             />
             <button
               type="button"
@@ -536,6 +536,7 @@ function App() {
                   <button
                     type="button"
                     className="ghost"
+                    aria-label={`Edit ${entry.name}`}
                     onClick={() => handleEditStart(entry)}
                     disabled={isSpinning}
                   >
@@ -544,6 +545,7 @@ function App() {
                   <button
                     type="button"
                     className="ghost"
+                    aria-label={`Delete ${entry.name}`}
                     onClick={() =>
                       dispatch({ type: 'delete-entry', payload: { id: entry.id } })
                     }
@@ -656,7 +658,7 @@ function App() {
               Auto-remove winner
             </label>
             <label>
-              Spin duration (ms)
+              Spin duration
               <input
                 type="range"
                 min={SPIN_DURATION_MIN_MS}
@@ -670,7 +672,7 @@ function App() {
                   })
                 }
               />
-              <span>{state.settings.spinDurationMs}</span>
+              <span>{(state.settings.spinDurationMs / 1000).toFixed(1)} s</span>
             </label>
           </section>
         </section>
