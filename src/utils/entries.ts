@@ -1,4 +1,5 @@
 import type { Entry } from '../types';
+import { MAX_ENTRY_NAME_LENGTH } from '../types';
 import { createId } from './ids';
 import { generateUnbiasedIndex } from './random';
 
@@ -13,7 +14,7 @@ export function createEntry(name: string): Entry {
 export function trimAndFilterLines(multilineText: string): string[] {
   return multilineText
     .split(/\r?\n/g)
-    .map((line) => line.trim())
+    .map((line) => line.trim().slice(0, MAX_ENTRY_NAME_LENGTH))
     .filter((line) => line.length > 0);
 }
 
@@ -22,7 +23,7 @@ export function findDuplicatesByCaseInsensitive(values: string[]): Set<string> {
   const duplicates = new Set<string>();
 
   for (const value of values) {
-    const normalized = value.toLocaleLowerCase();
+    const normalized = value.toLowerCase();
     if (seen.has(normalized)) {
       duplicates.add(normalized);
       continue;
@@ -37,7 +38,7 @@ export function deduplicateCaseInsensitive(values: string[]): string[] {
   const seen = new Set<string>();
 
   return values.filter((value) => {
-    const normalized = value.toLocaleLowerCase();
+    const normalized = value.toLowerCase();
     if (seen.has(normalized)) {
       return false;
     }

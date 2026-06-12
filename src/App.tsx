@@ -9,6 +9,7 @@ import {
 } from 'react';
 import confetti from 'canvas-confetti';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ConfirmModal } from './components/ConfirmModal';
 import { DevFairnessPanel } from './components/DevFairnessPanel';
 import { DuplicateChoiceModal } from './components/DuplicateChoiceModal';
 import { HistoryPanel } from './components/HistoryPanel';
@@ -18,7 +19,14 @@ import {
   createInitialWheelState,
   wheelReducer,
 } from './reducer/wheelReducer';
-import type { Entry } from './types';
+import {
+  MAX_ENTRIES,
+  MAX_ENTRY_NAME_LENGTH,
+  SPIN_DURATION_MAX_MS,
+  SPIN_DURATION_MIN_MS,
+  SPIN_SETTLE_BUFFER_MS,
+  type Entry,
+} from './types';
 import {
   deduplicateCaseInsensitive,
   trimAndFilterLines,
@@ -46,11 +54,11 @@ type WinnerState = {
 };
 
 function countDuplicatesAgainstCurrent(names: string[], entries: Entry[]): number {
-  const seen = new Set(entries.map((entry) => entry.name.toLocaleLowerCase()));
+  const seen = new Set(entries.map((entry) => entry.name.toLowerCase()));
   let duplicates = 0;
 
   for (const name of names) {
-    const normalized = name.toLocaleLowerCase();
+    const normalized = name.toLowerCase();
     if (seen.has(normalized)) {
       duplicates += 1;
       continue;
@@ -64,10 +72,10 @@ function countDuplicatesAgainstCurrent(names: string[], entries: Entry[]): numbe
 
 function removeDuplicatesAgainstCurrent(names: string[], entries: Entry[]): string[] {
   const filtered = deduplicateCaseInsensitive(names);
-  const seen = new Set(entries.map((entry) => entry.name.toLocaleLowerCase()));
+  const seen = new Set(entries.map((entry) => entry.name.toLowerCase()));
 
   return filtered.filter((name) => {
-    const normalized = name.toLocaleLowerCase();
+    const normalized = name.toLowerCase();
     if (seen.has(normalized)) {
       return false;
     }
@@ -109,6 +117,7 @@ function App() {
   const [currentSpinDurationMs, setCurrentSpinDurationMs] = useState(
     state.settings.spinDurationMs,
   );
+  const [confirmClearEntries, setConfirmClearEntries] = useState(false);
   const [pendingImport, setPendingImport] = useState<PendingImport | null>(null);
   const [pendingWinner, setPendingWinner] = useState<Omit<WinnerState, 'removed'> | null>(
     null,
@@ -129,6 +138,7 @@ function App() {
 
   const spinDisabled =
     isSpinning || !secureRandomAvailable || state.entries.length === 0;
+  const entryLimitReached = state.entries.length >= MAX_ENTRIES;
 
   const hasRemovedWinners = state.history.some((item) => item.removedAfterWin);
   const isExhausted = state.entries.length === 0 && hasRemovedWinners;
@@ -249,7 +259,7 @@ function App() {
 
     const timeoutId = window.setTimeout(() => {
       handleSpinEnd();
-    }, currentSpinDurationMs + 140);
+    }, currentSpinDurationMs + SPIN_SETTLE_BUFFER_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -258,7 +268,12 @@ function App() {
 
   function handleSingleAdd(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    const next = singleDraft.trim();
+
+    if (entryLimitReached) {
+      return;
+    }
+
+    const next = singleDraft.trim().slice(0, MAX_ENTRY_NAME_LENGTH);
     if (!next) {
       return;
     }
@@ -268,6 +283,10 @@ function App() {
   }
 
   function handleBulkImport(): void {
+    if (entryLimitReached) {
+      return;
+    }
+
     const names = trimAndFilterLines(bulkDraft);
     if (names.length === 0) {
       return;
@@ -384,11 +403,7 @@ function App() {
                 type="button"
                 className="ghost"
                 disabled={isSpinning || state.entries.length === 0}
-                onClick={() => {
-                  if (window.confirm('Clear all active entries?')) {
-                    dispatch({ type: 'clear-entries' });
-                  }
-                }}
+                onClick={() => setConfirmClearEntries(true)}
               >
                 Clear all
               </button>
@@ -396,13 +411,24 @@ function App() {
           </div>
 
           <form className="add-row" onSubmit={handleSingleAdd}>
+            <label className="sr-only" htmlFor="single-entry-input">
+              Add one name
+            </label>
             <input
+              id="single-entry-input"
               value={singleDraft}
-              onChange={(event) => setSingleDraft(event.target.value)}
+              onChange={(event) =>
+                setSingleDraft(event.target.value.slice(0, MAX_ENTRY_NAME_LENGTH))
+              }
               placeholder="Add one name"
-              disabled={isSpinning}
+              maxLength={MAX_ENTRY_NAME_LENGTH}
+              disabled={isSpinning || entryLimitReached}
             />
-            <button type="submit" className="primary" disabled={isSpinning}>
+            <button
+              type="submit"
+              className="primary"
+              disabled={isSpinning || entryLimitReached}
+            >
               Add
             </button>
           </form>
@@ -413,7 +439,7 @@ function App() {
               id="bulk-import"
               value={bulkDraft}
               onChange={(event) => setBulkDraft(event.target.value)}
-              disabled={isSpinning}
+              disabled={isSpinning || entryLimitReached}
               rows={5}
               placeholder={'Paste names, one per line'}
             />
@@ -421,7 +447,7 @@ function App() {
               type="button"
               className="secondary"
               onClick={handleBulkImport}
-              disabled={isSpinning}
+              disabled={isSpinning || entryLimitReached}
             >
               Import lines
             </button>
@@ -433,13 +459,16 @@ function App() {
                 {editingId === entry.id ? (
                   <input
                     value={editingDraft}
-                    onChange={(event) => setEditingDraft(event.target.value)}
+                    onChange={(event) =>
+                      setEditingDraft(event.target.value.slice(0, MAX_ENTRY_NAME_LENGTH))
+                    }
                     onBlur={commitEdit}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter') {
                         commitEdit();
                       }
                     }}
+                    maxLength={MAX_ENTRY_NAME_LENGTH}
                     autoFocus
                     disabled={isSpinning}
                   />
@@ -475,6 +504,12 @@ function App() {
               {isExhausted
                 ? 'All entries have been picked.'
                 : 'Add at least one entry to spin.'}
+            </p>
+          ) : null}
+
+          {entryLimitReached ? (
+            <p className="muted" role="status">
+              Entry limit reached ({MAX_ENTRIES}). Remove an entry to add more.
             </p>
           ) : null}
         </section>
@@ -567,8 +602,8 @@ function App() {
               Spin duration (ms)
               <input
                 type="range"
-                min={2000}
-                max={8000}
+                min={SPIN_DURATION_MIN_MS}
+                max={SPIN_DURATION_MAX_MS}
                 step={100}
                 value={state.settings.spinDurationMs}
                 onChange={(event) =>
@@ -631,10 +666,33 @@ function App() {
               onClose={() => setWinnerState(null)}
               onSpinAgain={() => {
                 setWinnerState(null);
+                // Keep behavior consistent for both auto-remove and manual-remove modes.
                 runSpinWithEntries(state.entries);
               }}
               onRemoveWinner={handleRemoveWinner}
               onRemoveAndSpinAgain={handleRemoveAndSpinAgain}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {confirmClearEntries ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ConfirmModal
+              title="Clear all entries?"
+              message="This removes every active entry from the wheel."
+              cancelLabel="Cancel"
+              confirmLabel="Clear all"
+              onCancel={() => setConfirmClearEntries(false)}
+              onConfirm={() => {
+                setConfirmClearEntries(false);
+                dispatch({ type: 'clear-entries' });
+              }}
             />
           </motion.div>
         ) : null}

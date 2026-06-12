@@ -2,9 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss:;"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pickwise</title>
+    <meta
+      name="description"
+      content="PickWise is a privacy-first wheel picker with secure randomness and equal-odds spins."
+    />
+    <meta property="og:title" content="PickWise - Wheel Picker" />
+    <meta
+      property="og:description"
+      content="Spin an equal-odds wheel with secure randomness. Your entries stay on-device."
+    />
+    <title>PickWise - Wheel Picker</title>
   </head>
   <body>
     <div id="root"></div>

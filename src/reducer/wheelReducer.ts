@@ -1,5 +1,8 @@
 import {
   defaultWheelSettings,
+  MAX_ENTRIES,
+  MAX_ENTRY_NAME_LENGTH,
+  MAX_HISTORY_ITEMS,
   type Entry,
   type SpinHistoryItem,
   type WheelSettings,
@@ -30,13 +33,20 @@ export function createInitialWheelState(overrides?: Partial<WheelState>): WheelS
 }
 
 function createEntriesFromNames(names: string[]): Entry[] {
-  return names.map((name) => createEntry(name));
+  return names
+    .map((name) => name.trim().slice(0, MAX_ENTRY_NAME_LENGTH))
+    .filter((name) => name.length > 0)
+    .map((name) => createEntry(name));
 }
 
 export function wheelReducer(state: WheelState, action: WheelAction): WheelState {
   switch (action.type) {
     case 'add-entry': {
-      const nextName = action.payload.name.trim();
+      if (state.entries.length >= MAX_ENTRIES) {
+        return state;
+      }
+
+      const nextName = action.payload.name.trim().slice(0, MAX_ENTRY_NAME_LENGTH);
       if (!nextName) {
         return state;
       }
@@ -48,18 +58,27 @@ export function wheelReducer(state: WheelState, action: WheelAction): WheelState
     }
 
     case 'add-many': {
-      if (action.payload.names.length === 0) {
+      if (action.payload.names.length === 0 || state.entries.length >= MAX_ENTRIES) {
+        return state;
+      }
+
+      const remainingSlots = MAX_ENTRIES - state.entries.length;
+      const nextEntries = createEntriesFromNames(action.payload.names).slice(
+        0,
+        remainingSlots,
+      );
+      if (nextEntries.length === 0) {
         return state;
       }
 
       return {
         ...state,
-        entries: [...state.entries, ...createEntriesFromNames(action.payload.names)],
+        entries: [...state.entries, ...nextEntries],
       };
     }
 
     case 'edit-entry': {
-      const nextName = action.payload.name.trim();
+      const nextName = action.payload.name.trim().slice(0, MAX_ENTRY_NAME_LENGTH);
       if (!nextName) {
         return state;
       }
@@ -96,7 +115,7 @@ export function wheelReducer(state: WheelState, action: WheelAction): WheelState
     case 'record-winner': {
       return {
         ...state,
-        history: [action.payload, ...state.history],
+        history: [action.payload, ...state.history].slice(0, MAX_HISTORY_ITEMS),
       };
     }
 
@@ -120,12 +139,16 @@ export function wheelReducer(state: WheelState, action: WheelAction): WheelState
     }
 
     case 'restore-from-history': {
-      const existing = new Set(state.entries.map((entry) => entry.name.toLocaleLowerCase()));
+      if (state.entries.length >= MAX_ENTRIES) {
+        return state;
+      }
+
+      const existing = new Set(state.entries.map((entry) => entry.name.toLowerCase()));
       const restorables = state.history
         .filter((item) => item.removedAfterWin)
         .map((item) => item.winnerNameSnapshot)
         .filter((name) => {
-          const normalized = name.toLocaleLowerCase();
+          const normalized = name.toLowerCase();
           if (existing.has(normalized)) {
             return false;
           }
@@ -138,9 +161,15 @@ export function wheelReducer(state: WheelState, action: WheelAction): WheelState
         return state;
       }
 
+      const remainingSlots = MAX_ENTRIES - state.entries.length;
+      const restoredEntries = createEntriesFromNames(restorables).slice(0, remainingSlots);
+      if (restoredEntries.length === 0) {
+        return state;
+      }
+
       return {
         ...state,
-        entries: [...state.entries, ...createEntriesFromNames(restorables)],
+        entries: [...state.entries, ...restoredEntries],
       };
     }
 

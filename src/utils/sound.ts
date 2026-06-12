@@ -1,20 +1,53 @@
+type AudioContextConstructor = new () => AudioContext;
+
+let sharedAudioContext: AudioContext | null = null;
+
+function getAudioContextConstructor(
+  win: Window,
+): AudioContextConstructor | undefined {
+  const standardCtor = (
+    win as Window & { AudioContext?: AudioContextConstructor }
+  ).AudioContext;
+  const fallbackCtor = (
+    win as Window & { webkitAudioContext?: AudioContextConstructor }
+  ).webkitAudioContext;
+  return standardCtor || fallbackCtor;
+}
+
+function getSharedAudioContext(win: Window): AudioContext | null {
+  if (sharedAudioContext && sharedAudioContext.state !== 'closed') {
+    return sharedAudioContext;
+  }
+
+  const AudioContextCtor = getAudioContextConstructor(win);
+  if (!AudioContextCtor) {
+    return null;
+  }
+
+  try {
+    sharedAudioContext = new AudioContextCtor();
+    return sharedAudioContext;
+  } catch {
+    return null;
+  }
+}
+
 export async function playWinTone(): Promise<void> {
   if (typeof window === 'undefined') {
     return;
   }
 
-  type AudioContextConstructor = new () => AudioContext;
-  const fallbackCtor = (
-    window as Window & { webkitAudioContext?: AudioContextConstructor }
-  ).webkitAudioContext;
-  const AudioContextCtor = window.AudioContext || fallbackCtor;
-  if (!AudioContextCtor) {
+  const context = getSharedAudioContext(window);
+  if (!context) {
     return;
   }
 
-  const context = new AudioContextCtor();
-  if (context.state === 'suspended') {
-    await context.resume();
+  try {
+    if (context.state === 'suspended') {
+      await context.resume();
+    }
+  } catch {
+    return;
   }
 
   const now = context.currentTime;
@@ -37,6 +70,7 @@ export async function playWinTone(): Promise<void> {
   oscillator.stop(now + 0.42);
 
   oscillator.addEventListener('ended', () => {
-    void context.close();
+    oscillator.disconnect();
+    gain.disconnect();
   });
 }

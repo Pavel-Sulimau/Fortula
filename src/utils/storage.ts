@@ -1,4 +1,12 @@
-import { defaultWheelSettings, type PersistedWheelState } from '../types';
+import {
+  defaultWheelSettings,
+  MAX_ENTRIES,
+  MAX_ENTRY_NAME_LENGTH,
+  MAX_HISTORY_ITEMS,
+  SPIN_DURATION_MAX_MS,
+  SPIN_DURATION_MIN_MS,
+  type PersistedWheelState,
+} from '../types';
 
 export const STORAGE_KEY = 'pickwise-state-v1';
 
@@ -29,21 +37,29 @@ export function loadPersistedState(): PersistedWheelState | undefined {
             );
           },
         )
+          .map((entry) => ({
+            ...entry,
+            name: entry.name.trim().slice(0, MAX_ENTRY_NAME_LENGTH),
+          }))
+          .filter((entry) => entry.name.length > 0)
+          .slice(0, MAX_ENTRIES)
       : [];
 
     const history = Array.isArray(parsed.history)
-      ? parsed.history.filter(
-          (item): item is PersistedWheelState['history'][number] => {
-            return (
-              isPlainObject(item) &&
-              typeof item.id === 'string' &&
-              typeof item.winnerEntryId === 'string' &&
-              typeof item.winnerNameSnapshot === 'string' &&
-              typeof item.timestamp === 'number' &&
-              typeof item.removedAfterWin === 'boolean'
-            );
-          },
-        )
+      ? parsed.history
+          .filter(
+            (item): item is PersistedWheelState['history'][number] => {
+              return (
+                isPlainObject(item) &&
+                typeof item.id === 'string' &&
+                typeof item.winnerEntryId === 'string' &&
+                typeof item.winnerNameSnapshot === 'string' &&
+                typeof item.timestamp === 'number' &&
+                typeof item.removedAfterWin === 'boolean'
+              );
+            },
+          )
+          .slice(0, MAX_HISTORY_ITEMS)
       : [];
 
     const settings = isPlainObject(parsed.settings)
@@ -65,7 +81,9 @@ export function loadPersistedState(): PersistedWheelState | undefined {
               ? parsed.settings.autoRemoveWinner
               : defaultWheelSettings.autoRemoveWinner,
           spinDurationMs:
-            typeof parsed.settings.spinDurationMs === 'number'
+            typeof parsed.settings.spinDurationMs === 'number' &&
+            parsed.settings.spinDurationMs >= SPIN_DURATION_MIN_MS &&
+            parsed.settings.spinDurationMs <= SPIN_DURATION_MAX_MS
               ? parsed.settings.spinDurationMs
               : defaultWheelSettings.spinDurationMs,
         }
@@ -82,5 +100,9 @@ export function loadPersistedState(): PersistedWheelState | undefined {
 }
 
 export function savePersistedState(state: PersistedWheelState): void {
-  globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Ignore storage failures (quota/private mode) and keep app functional.
+  }
 }
