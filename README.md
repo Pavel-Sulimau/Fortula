@@ -30,6 +30,8 @@ npm run dev            # local development
 npm run lint           # static checks
 npm run test           # test suite
 npm run test:coverage  # coverage report
+npx playwright install chromium # one-time browser install for E2E
+npm run test:e2e       # end-to-end suite against preview build
 npm run build          # production build
 npm run preview        # preview build output
 ```

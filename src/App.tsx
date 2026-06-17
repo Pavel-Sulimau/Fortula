@@ -260,7 +260,7 @@ function App() {
     });
 
     let removed = false;
-    if (state.settings.autoRemoveWinner) {
+    if (state.settings.eliminationMode) {
       dispatch({
         type: 'remove-winner',
         payload: {
@@ -293,7 +293,7 @@ function App() {
   }, [
     pendingWinner,
     reduceMotion,
-    state.settings.autoRemoveWinner,
+    state.settings.eliminationMode,
     state.settings.confettiEnabled,
     state.settings.soundEnabled,
   ]);
@@ -641,19 +641,6 @@ function App() {
                 }
               />
               Elimination mode
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={state.settings.autoRemoveWinner}
-                onChange={(event) =>
-                  dispatch({
-                    type: 'update-settings',
-                    payload: { autoRemoveWinner: event.target.checked },
-                  })
-                }
-              />
-              Auto-remove winner
             </label>
             <label>
               Spin duration

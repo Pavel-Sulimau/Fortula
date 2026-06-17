@@ -81,10 +81,6 @@ export function loadPersistedState(): PersistedWheelState | undefined {
             typeof parsed.settings.eliminationMode === 'boolean'
               ? parsed.settings.eliminationMode
               : defaultWheelSettings.eliminationMode,
-          autoRemoveWinner:
-            typeof parsed.settings.autoRemoveWinner === 'boolean'
-              ? parsed.settings.autoRemoveWinner
-              : defaultWheelSettings.autoRemoveWinner,
           spinDurationMs:
             typeof parsed.settings.spinDurationMs === 'number' &&
             parsed.settings.spinDurationMs >= SPIN_DURATION_MIN_MS &&

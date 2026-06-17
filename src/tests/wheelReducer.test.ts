@@ -97,4 +97,20 @@ describe('wheelReducer', () => {
 
     expect(next.settings.spinDurationMs).toBe(defaultWheelSettings.spinDurationMs);
   });
+
+  it('updates elimination mode setting', () => {
+    const state = createInitialWheelState({
+      settings: {
+        ...defaultWheelSettings,
+        eliminationMode: false,
+      },
+    });
+
+    const next = wheelReducer(state, {
+      type: 'update-settings',
+      payload: { eliminationMode: true },
+    });
+
+    expect(next.settings.eliminationMode).toBe(true);
+  });
 });

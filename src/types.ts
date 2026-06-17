@@ -8,7 +8,6 @@ export type WheelSettings = {
   soundEnabled: boolean;
   confettiEnabled: boolean;
   eliminationMode: boolean;
-  autoRemoveWinner: boolean;
   spinDurationMs: number;
 };
 
@@ -39,6 +38,5 @@ export const defaultWheelSettings: WheelSettings = {
   soundEnabled: false,
   confettiEnabled: true,
   eliminationMode: false,
-  autoRemoveWinner: false,
   spinDurationMs: 5200,
 };
