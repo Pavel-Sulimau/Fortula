@@ -1,34 +1,41 @@
-type AudioContextConstructor = new () => AudioContext;
+type AudioConstructor = new (src?: string) => HTMLAudioElement;
 
-let sharedAudioContext: AudioContext | null = null;
+let sharedWinAudio: HTMLAudioElement | null = null;
 
-function getAudioContextConstructor(
-  win: Window,
-): AudioContextConstructor | undefined {
-  const standardCtor = (
-    win as Window & { AudioContext?: AudioContextConstructor }
-  ).AudioContext;
-  const fallbackCtor = (
-    win as Window & { webkitAudioContext?: AudioContextConstructor }
-  ).webkitAudioContext;
-  return standardCtor || fallbackCtor;
-}
+const WIN_SOUND_ASSET_PATH = '/sounds/win-bugle.ogg';
 
-function getSharedAudioContext(win: Window): AudioContext | null {
-  if (sharedAudioContext && sharedAudioContext.state !== 'closed') {
-    return sharedAudioContext;
+function getSharedWinAudio(win: Window): HTMLAudioElement | null {
+  if (sharedWinAudio) {
+    return sharedWinAudio;
   }
 
-  const AudioContextCtor = getAudioContextConstructor(win);
-  if (!AudioContextCtor) {
+  const AudioCtor = (win as Window & { Audio?: AudioConstructor }).Audio;
+  if (!AudioCtor) {
     return null;
   }
 
   try {
-    sharedAudioContext = new AudioContextCtor();
-    return sharedAudioContext;
+    const audio = new AudioCtor(WIN_SOUND_ASSET_PATH);
+    audio.preload = 'auto';
+    sharedWinAudio = audio;
+    return sharedWinAudio;
   } catch {
     return null;
+  }
+}
+
+async function playWinSample(win: Window): Promise<boolean> {
+  const audio = getSharedWinAudio(win);
+  if (!audio) {
+    return false;
+  }
+
+  try {
+    audio.currentTime = 0;
+    await audio.play();
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -37,40 +44,5 @@ export async function playWinTone(): Promise<void> {
     return;
   }
 
-  const context = getSharedAudioContext(window);
-  if (!context) {
-    return;
-  }
-
-  try {
-    if (context.state === 'suspended') {
-      await context.resume();
-    }
-  } catch {
-    return;
-  }
-
-  const now = context.currentTime;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-
-  oscillator.type = 'triangle';
-  oscillator.frequency.setValueAtTime(440, now);
-  oscillator.frequency.exponentialRampToValueAtTime(660, now + 0.18);
-  oscillator.frequency.exponentialRampToValueAtTime(880, now + 0.36);
-
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.16, now + 0.04);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
-
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-
-  oscillator.start(now);
-  oscillator.stop(now + 0.42);
-
-  oscillator.addEventListener('ended', () => {
-    oscillator.disconnect();
-    gain.disconnect();
-  });
+  await playWinSample(window);
 }
