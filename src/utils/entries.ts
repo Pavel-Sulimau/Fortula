@@ -47,22 +47,6 @@ export function trimAndFilterLines(multilineText: string, maxLines = MAX_ENTRIES
   return trimmedLines;
 }
 
-export function findDuplicatesByCaseInsensitive(values: string[]): Set<string> {
-  const seen = new Set<string>();
-  const duplicates = new Set<string>();
-
-  for (const value of values) {
-    const normalized = value.toLowerCase();
-    if (seen.has(normalized)) {
-      duplicates.add(normalized);
-      continue;
-    }
-    seen.add(normalized);
-  }
-
-  return duplicates;
-}
-
 export function deduplicateCaseInsensitive(values: string[]): string[] {
   const seen = new Set<string>();
 
@@ -78,12 +62,14 @@ export function deduplicateCaseInsensitive(values: string[]): string[] {
 }
 
 export function secureShuffle<T>(values: T[]): T[] {
-  const next = [...values];
+  const shuffled = [...values];
 
-  for (let index = next.length - 1; index > 0; index -= 1) {
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const swapIndex = generateUnbiasedIndex(index + 1);
-    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+    const current = shuffled[index] as T;
+    shuffled[index] = shuffled[swapIndex] as T;
+    shuffled[swapIndex] = current;
   }
 
-  return next;
+  return shuffled;
 }
